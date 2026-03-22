@@ -1,0 +1,13 @@
+{
+  "name": "az-content-generator",
+  "version": "1.0.0",
+  "description": "AI-powered content generator for A-Z Services LLC",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^4.18.2"
+  }
+}

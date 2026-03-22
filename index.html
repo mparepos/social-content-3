@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Z Services LLC — Content Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:      #1B3A5C;
+      --gold:      #C8973A;
+      --gold-dark: #b8862e;
+      --white:     #FFFFFF;
+      --sky:       #EAF2FB;
+      --charcoal:  #2D2D2D;
+      --gray-mid:  #7A7A7A;
+      --gray-light:#F4F4F4;
+      --border:    #e0e8f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-light);
+      color: var(--charcoal);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .logo-text .arrow { color: var(--gold); }
+    .header-badge {
+      font-size: 0.75rem;
+      background: rgba(200,151,58,0.18);
+      color: var(--gold);
+      border: 1px solid rgba(200,151,58,0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #1B3A5C 0%, #243f61 100%);
+      color: var(--white);
+      padding: 64px 40px 56px;
+      text-align: center;
+      border-bottom: 4px solid var(--gold);
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .hero h1 em { color: var(--gold); font-style: normal; }
+    .hero p {
+      color: rgba(255,255,255,0.72);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.75;
+    }
+    .btn-generate {
+      background: var(--gold);
+      color: var(--white);
+      border: none;
+      padding: 16px 56px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.4px;
+      box-shadow: 0 4px 16px rgba(200,151,58,0.4);
+    }
+    .btn-generate:hover:not(:disabled) {
+      background: var(--gold-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(200,151,58,0.5);
+    }
+    .btn-generate:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-generate .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .btn-generate.loading .spinner { display: inline-block; }
+    .btn-generate.loading .btn-label::after { content: "…"; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── STATUS BAR ── */
+    #status-bar {
+      display: none;
+      background: var(--navy);
+      color: rgba(255,255,255,0.8);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 10px 40px;
+      letter-spacing: 0.3px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    #status-bar .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--gold);
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── IDEAS ROW ── */
+    .ideas-section {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+      display: none;
+    }
+    .ideas-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: var(--navy);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .ideas-section h2 span {
+      color: var(--gold);
+    }
+    .ideas-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* ── IDEA CARD ── */
+    .idea-card {
+      background: var(--sky);
+      border: 1px solid #cde0f0;
+      border-left: 4px solid var(--gold);
+      border-radius: 6px;
+      padding: 20px;
+      min-height: 100px;
+    }
+    .idea-card .platform-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--navy);
+      opacity: 0.65;
+      margin-bottom: 10px;
+    }
+    .idea-card .idea-text {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--charcoal);
+      white-space: pre-wrap;
+    }
+    .idea-card .idea-text.streaming::after {
+      content: '▋';
+      color: var(--gold);
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── CONTENT GRID ── */
+    .content-section {
+      max-width: 1200px;
+      margin: 32px auto 60px;
+      padding: 0 24px;
+      display: none;
+    }
+    .content-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: var(--navy);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    .content-section h2 span { color: var(--gold); }
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── CONTENT CARD ── */
+    .content-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(27,58,92,0.07);
+      transition: box-shadow 0.2s;
+    }
+    .content-card:hover { box-shadow: 0 6px 20px rgba(27,58,92,0.12); }
+
+    .card-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header .platform-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .card-header .platform-icon.blog    { background: rgba(200,151,58,0.25); }
+    .card-header .platform-icon.linkedin{ background: rgba(200,151,58,0.25); }
+    .card-header .platform-icon.facebook{ background: rgba(200,151,58,0.25); }
+    .card-header h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .card-header .post-type {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 400;
+      margin-top: 1px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+    .post-text {
+      font-size: 0.875rem;
+      line-height: 1.75;
+      color: var(--charcoal);
+      white-space: pre-wrap;
+      min-height: 60px;
+    }
+    .post-text.streaming::after {
+      content: '▋';
+      color: var(--gold);
+      animation: blink 0.9s step-end infinite;
+    }
+
+    /* Markdown rendering for blog post */
+    .post-text.rendered { white-space: normal; }
+    .post-text.rendered h1,
+    .post-text.rendered h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--navy);
+      margin: 20px 0 10px;
+      line-height: 1.3;
+    }
+    .post-text.rendered h1 { font-size: 1.2rem; }
+    .post-text.rendered h2 { font-size: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .post-text.rendered h3 { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin: 14px 0 6px; }
+    .post-text.rendered p  { margin-bottom: 12px; font-size: 0.875rem; }
+    .post-text.rendered ul,
+    .post-text.rendered ol { margin: 10px 0 10px 20px; }
+    .post-text.rendered li { margin-bottom: 6px; font-size: 0.875rem; }
+    .post-text.rendered strong { font-weight: 600; color: var(--navy); }
+    .post-text.rendered em { font-style: italic; color: var(--gray-mid); font-size: 0.83rem; }
+    .post-text.rendered a  { color: var(--gold-dark); }
+
+    .card-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--gray-light);
+    }
+    .word-count {
+      font-size: 0.75rem;
+      color: var(--gray-mid);
+      font-weight: 500;
+    }
+    .btn-copy {
+      background: transparent;
+      border: 1px solid var(--navy);
+      color: var(--navy);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn-copy:hover { background: var(--navy); color: var(--white); }
+    .btn-copy.copied { background: var(--gold); border-color: var(--gold); color: var(--white); }
+
+    /* ── ERROR STATE ── */
+    #error-msg {
+      display: none;
+      max-width: 600px;
+      margin: 32px auto;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 18px 24px;
+      color: #b91c1c;
+      font-size: 0.9rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .ideas-grid, .content-grid { grid-template-columns: 1fr; }
+      .hero { padding: 44px 24px 40px; }
+      header { padding: 16px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-text">A<span class="arrow">→</span>Z Services LLC</div>
+    <span class="header-badge">Content Generator</span>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Generate <em>Fresh Content</em><br>Powered by AI</h1>
+    <p>One click creates a new blog post, LinkedIn post, and Facebook post — each with a unique idea and full copy written in A-Z's exact brand voice.</p>
+    <button class="btn-generate" id="generate-btn" onclick="generate()">
+      <span class="spinner"></span>
+      <span class="btn-label">Generate New Content</span>
+    </button>
+  </section>
+
+  <!-- STATUS BAR -->
+  <div id="status-bar">
+    <span class="dot"></span>
+    <span id="status-text">Generating ideas and writing content…</span>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error-msg"></div>
+
+  <!-- IDEAS -->
+  <section class="ideas-section" id="ideas-section">
+    <h2>Content <span>Ideas</span></h2>
+    <div class="ideas-grid">
+      <div class="idea-card">
+        <div class="platform-label">📝 Blog Post Idea</div>
+        <div class="idea-text" id="blog-idea"></div>
+      </div>
+      <div class="idea-card">
+        <div class="platform-label">💼 LinkedIn Idea</div>
+        <div class="idea-text" id="linkedin-idea"></div>
+      </div>
+      <div class="idea-card">
+        <div class="platform-label">👥 Facebook Idea</div>
+        <div class="idea-text" id="facebook-idea"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="content-section" id="content-section">
+    <h2>Generated <span>Content</span></h2>
+    <div class="content-grid">
+
+      <!-- BLOG -->
+      <div class="content-card">
+        <div class="card-header">
+          <div class="platform-icon blog">📝</div>
+          <div>
+            <h3>Blog Post</h3>
+            <div class="post-type">Long-form article · ~800 words</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="post-text" id="blog-post"></div>
+        </div>
+        <div class="card-footer">
+          <span class="word-count" id="blog-words"></span>
+          <button class="btn-copy" onclick="copy('blog-post', this)">Copy</button>
+        </div>
+      </div>
+
+      <!-- LINKEDIN -->
+      <div class="content-card">
+        <div class="card-header">
+          <div class="platform-icon linkedin">💼</div>
+          <div>
+            <h3>LinkedIn Post</h3>
+            <div class="post-type">Professional thought-leadership</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="post-text" id="linkedin-post"></div>
+        </div>
+        <div class="card-footer">
+          <span class="word-count" id="linkedin-words"></span>
+          <button class="btn-copy" onclick="copy('linkedin-post', this)">Copy</button>
+        </div>
+      </div>
+
+      <!-- FACEBOOK -->
+      <div class="content-card">
+        <div class="card-header">
+          <div class="platform-icon facebook">👥</div>
+          <div>
+            <h3>Facebook Post</h3>
+            <div class="post-type">Community · conversational</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="post-text" id="facebook-post"></div>
+        </div>
+        <div class="card-footer">
+          <span class="word-count" id="facebook-words"></span>
+          <button class="btn-copy" onclick="copy('facebook-post', this)">Copy</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    // ── Section markers ──────────────────────────────────
+    const SECTIONS = [
+      { key: 'blogIdea',      open: '[BLOG_IDEA]',      close: '[/BLOG_IDEA]',      el: 'blog-idea'      },
+      { key: 'linkedinIdea',  open: '[LINKEDIN_IDEA]',  close: '[/LINKEDIN_IDEA]',  el: 'linkedin-idea'  },
+      { key: 'facebookIdea',  open: '[FACEBOOK_IDEA]',  close: '[/FACEBOOK_IDEA]',  el: 'facebook-idea'  },
+      { key: 'blogPost',      open: '[BLOG_POST]',      close: '[/BLOG_POST]',      el: 'blog-post'      },
+      { key: 'linkedinPost',  open: '[LINKEDIN_POST]',  close: '[/LINKEDIN_POST]',  el: 'linkedin-post'  },
+      { key: 'facebookPost',  open: '[FACEBOOK_POST]',  close: '[/FACEBOOK_POST]',  el: 'facebook-post'  },
+    ];
+
+    let fullText = '';
+    let generating = false;
+
+    // ── Extract section content from accumulated text ────
+    function extractSection(text, open, close) {
+      const start = text.indexOf(open);
+      if (start === -1) return null;
+      const contentStart = start + open.length;
+      const end = text.indexOf(close, contentStart);
+      const raw = end === -1
+        ? text.slice(contentStart)          // still streaming
+        : text.slice(contentStart, end);    // complete
+      return raw.replace(/^\n+/, '').replace(/\n+$/, ''); // trim leading/trailing newlines
+    }
+
+    function isComplete(text, close) {
+      return text.indexOf(close) !== -1;
+    }
+
+    // ── Minimal Markdown → HTML (for blog post only) ────
+    function renderMarkdown(md) {
+      return md
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/(<li>[\s\S]+?<\/li>)/g, '<ul>$1</ul>')
+        .split(/\n{2,}/)
+        .map(block => {
+          block = block.trim();
+          if (!block) return '';
+          if (/^<[hul]/.test(block)) return block;
+          return `<p>${block}</p>`;
+        })
+        .join('\n');
+    }
+
+    // ── Update word count ────────────────────────────────
+    function updateWordCount(elId, text) {
+      const countEl = document.getElementById(elId.replace('-post', '-words').replace('-idea', '-words'));
+      if (!countEl) return;
+      const words = text.trim().split(/\s+/).filter(Boolean).length;
+      countEl.textContent = words > 0 ? `${words} words` : '';
+    }
+
+    // ── Render all sections from current fullText ────────
+    function renderSections() {
+      let ideasVisible = false;
+      let contentVisible = false;
+
+      for (const sec of SECTIONS) {
+        const content = extractSection(fullText, sec.open, sec.close);
+        if (content === null) continue;
+
+        const el = document.getElementById(sec.el);
+        if (!el) continue;
+
+        const complete = isComplete(fullText, sec.close);
+
+        // Idea sections
+        if (sec.el.endsWith('-idea')) {
+          ideasVisible = true;
+          el.textContent = content;
+          el.classList.toggle('streaming', !complete);
+        }
+
+        // Content sections
+        if (sec.el.endsWith('-post')) {
+          contentVisible = true;
+          if (complete && sec.el === 'blog-post') {
+            el.innerHTML = renderMarkdown(content);
+            el.classList.add('rendered');
+            el.classList.remove('streaming');
+          } else {
+            el.textContent = content;
+            el.classList.toggle('streaming', !complete);
+          }
+          updateWordCount(sec.el, content);
+        }
+      }
+
+      if (ideasVisible)  document.getElementById('ideas-section').style.display = 'block';
+      if (contentVisible) document.getElementById('content-section').style.display = 'block';
+    }
+
+    // ── Main generate function ───────────────────────────
+    async function generate() {
+      if (generating) return;
+      generating = true;
+      fullText = '';
+
+      const btn = document.getElementById('generate-btn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      document.getElementById('status-bar').style.display = 'block';
+      document.getElementById('error-msg').style.display = 'none';
+
+      // Reset all content elements
+      SECTIONS.forEach(sec => {
+        const el = document.getElementById(sec.el);
+        if (el) {
+          el.textContent = '';
+          el.innerHTML = '';
+          el.className = el.className.replace('rendered', '').replace('streaming', '').trim();
+          if (sec.el.endsWith('post-type')) return;
+        }
+      });
+      document.getElementById('ideas-section').style.display = 'none';
+      document.getElementById('content-section').style.display = 'none';
+      ['blog-words','linkedin-words','facebook-words'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '';
+      });
+
+      try {
+        const response = await fetch('/api/generate');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep incomplete line
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6).trim();
+            if (!raw) continue;
+
+            let msg;
+            try { msg = JSON.parse(raw); } catch { continue; }
+
+            if (msg.type === 'text') {
+              fullText += msg.text;
+              renderSections();
+            } else if (msg.type === 'done') {
+              renderSections(); // final render
+              document.getElementById('status-text').textContent = '✓ Content generated successfully';
+              setTimeout(() => {
+                document.getElementById('status-bar').style.display = 'none';
+              }, 2000);
+            } else if (msg.type === 'error') {
+              throw new Error(msg.message);
+            }
+          }
+        }
+      } catch (err) {
+        const errEl = document.getElementById('error-msg');
+        errEl.textContent = `Error: ${err.message}. Make sure ANTHROPIC_API_KEY is set and the server is running.`;
+        errEl.style.display = 'block';
+        document.getElementById('status-bar').style.display = 'none';
+      } finally {
+        // Remove all streaming cursors
+        document.querySelectorAll('.streaming').forEach(el => el.classList.remove('streaming'));
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        generating = false;
+      }
+    }
+
+    // ── Copy to clipboard ────────────────────────────────
+    async function copy(elId, btn) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const text = el.innerText || el.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch {
+        btn.textContent = 'Failed';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>
